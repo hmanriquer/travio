@@ -1,14 +1,12 @@
 import { PageHeader } from "@/components/page-header";
-import { SummaryCards } from "@/components/summary-cards";
-import { ExpenseTable } from "@/components/expense-table";
+import { ExpenseDashboard } from "@/components/expense-dashboard";
 
 export default function Home() {
   return (
-    <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-      <div className="flex flex-col gap-8">
+    <main className="mx-auto max-w-7xl px-3 py-5 sm:px-6 sm:py-8 lg:px-8">
+      <div className="flex flex-col gap-5 sm:gap-8">
         <PageHeader />
-        <SummaryCards />
-        <ExpenseTable />
+        <ExpenseDashboard />
       </div>
     </main>
   );
