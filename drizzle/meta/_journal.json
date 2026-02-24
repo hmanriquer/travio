@@ -8,6 +8,13 @@
       "when": 1771892989640,
       "tag": "0000_nasty_shaman",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1771900414321,
+      "tag": "0001_bumpy_hedge_knight",
+      "breakpoints": true
     }
   ]
 }
