@@ -1,5 +1,7 @@
 'use client';
 
+import { Toaster } from '@/components/ui/sonner';
+import { TooltipProvider } from '@/components/ui/tooltip';
 import ReactQueryProvider from '@/providers/react-query.provider';
 import ThemeProvider from '@/providers/theme.provider';
 
@@ -11,7 +13,12 @@ export default function Providers({ children }: { children: React.ReactNode }) {
       enableSystem
       disableTransitionOnChange
     >
-      <ReactQueryProvider>{children}</ReactQueryProvider>
+      <ReactQueryProvider>
+        <TooltipProvider>
+          {children}
+          <Toaster />
+        </TooltipProvider>
+      </ReactQueryProvider>
     </ThemeProvider>
   );
 }
