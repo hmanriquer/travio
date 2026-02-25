@@ -2,6 +2,7 @@ import { relations } from 'drizzle-orm';
 import {
   boolean,
   integer,
+  pgEnum,
   pgTable,
   primaryKey,
   serial,
@@ -80,6 +81,12 @@ export const travelers = pgTable('travelers', {
   ...timestamps,
 });
 
+export const travelStatusEnum = pgEnum('travel_status', [
+  'approved',
+  'pending',
+  'rejected',
+]);
+
 export const travels = pgTable('travels', {
   id: serial('id').primaryKey(),
   travelerId: integer('traveler_id')
@@ -87,8 +94,10 @@ export const travels = pgTable('travels', {
     .references(() => travelers.id, { onDelete: 'cascade' }),
   from: text('from').notNull(),
   to: text('to').notNull(),
+  position: text('position').notNull(),
   totalAmount: integer('total_amount').notNull(),
   limit: integer('limit').notNull(),
+  status: travelStatusEnum('status').default('pending').notNull(),
   ...timestamps,
 });
 

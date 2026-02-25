@@ -1,8 +1,14 @@
 import { eq } from 'drizzle-orm';
 
 import { db } from '@/db';
-import { travels } from '@/db/schema';
-import type { NewTravel, Travel, UpdateTravel } from '@/schemas/travel.schema';
+import { travelers, travels } from '@/db/schema';
+import type {
+  NewTravel,
+  Travel,
+  TravelWithTraveler,
+  UpdateTravel,
+} from '@/schemas/travel.schema';
+import { getInitials } from '@/utils/utils';
 
 export class TravelService {
   constructor() {}
@@ -21,9 +27,21 @@ export class TravelService {
     return travel || null;
   }
 
-  static async listTravels(): Promise<Travel[]> {
-    const query = await db.select().from(travels);
-    return query;
+  static async listTravels(): Promise<TravelWithTraveler[]> {
+    const query = await db
+      .select({
+        travel: travels,
+        traveler: travelers,
+      })
+      .from(travels)
+      .innerJoin(travelers, eq(travels.travelerId, travelers.id));
+
+    return query.map(({ travel, traveler }) => ({
+      ...travel,
+      travelerName: traveler.name,
+      travelerInitials: getInitials(traveler.name),
+      travelerRole: travel.position,
+    }));
   }
 
   static async updateTravelById(

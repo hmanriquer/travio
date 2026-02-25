@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 
+import { travelSchema } from '@/schemas/travel.schema';
 import { TravelService } from '@/services/travel.service';
 
 export async function GET(
@@ -31,7 +32,8 @@ export async function PUT(
     if (isNaN(id))
       return NextResponse.json({ error: 'Invalid ID' }, { status: 400 });
     const body = await request.json();
-    const result = await TravelService.updateTravelById(id, body);
+    const validatedBody = travelSchema.partial().parse(body);
+    const result = await TravelService.updateTravelById(id, validatedBody);
     if (!result)
       return NextResponse.json({ error: 'Not Found' }, { status: 404 });
     return NextResponse.json(result, { status: 200 });

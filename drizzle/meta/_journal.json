@@ -15,6 +15,13 @@
       "when": 1771900414321,
       "tag": "0001_bumpy_hedge_knight",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1771909042010,
+      "tag": "0002_parallel_pete_wisdom",
+      "breakpoints": true
     }
   ]
 }
