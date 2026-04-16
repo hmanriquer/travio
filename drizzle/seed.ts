@@ -1,39 +1,48 @@
-import * as dotenv from "dotenv";
-dotenv.config({ path: ".env.local" });
+import { sql } from "@vercel/postgres"
+import bcrypt from "bcryptjs"
+import * as dotenv from "dotenv"
+import { drizzle } from "drizzle-orm/vercel-postgres"
+import xlsx from "xlsx"
 
-import xlsx from "xlsx";
-import { sql } from "@vercel/postgres";
-import { drizzle } from "drizzle-orm/vercel-postgres";
-import * as schema from "./schema";
+import * as schema from "./schema"
 
-const db = drizzle(sql, { schema });
+dotenv.config({ path: ".env.local" })
 
-async function seed() {
-  console.log("Seeding travelers from Excel file...");
+const db = drizzle(sql, { schema })
+
+// ---------------------------------------------------------------------------
+// Seed travelers from Excel
+// ---------------------------------------------------------------------------
+async function seedTravelers() {
+  console.log("Seeding travelers from Excel file...")
   try {
-    const workbook = xlsx.readFile('CONTROL SOLICITUDES DE GASTOS DE VIAJE Y VIATICOS 2026.xlsx');
-    
-    const uniqueTravelers = new Map<string, {
-      name: string;
-      department: string | null;
-      jobTitle: string | null;
-      baseRegion: string | null;
-    }>();
+    const workbook = xlsx.readFile(
+      "CONTROL SOLICITUDES DE GASTOS DE VIAJE Y VIATICOS 2026.xlsx"
+    )
+
+    const uniqueTravelers = new Map<
+      string,
+      {
+        name: string
+        department: string | null
+        jobTitle: string | null
+        baseRegion: string | null
+      }
+    >()
 
     // Parse 'VIATICOS SOLICITADOS'
     if (workbook.SheetNames.includes("VIATICOS SOLICITADOS")) {
-      const sheet = workbook.Sheets["VIATICOS SOLICITADOS"];
-      const data = xlsx.utils.sheet_to_json<any[][]>(sheet, { header: 1 });
-      
-      // Data starts roughly at index 2 (ignoring title row and header row if they are first)
+      const sheet = workbook.Sheets["VIATICOS SOLICITADOS"]
+      const data = xlsx.utils.sheet_to_json<unknown[][]>(sheet, { header: 1 })
+
       for (let i = 2; i < data.length; i++) {
-        const row = data[i];
-        if (!row || row.length === 0) continue;
-        
-        const name = String(row[1] || "").trim();
-        const department = String(row[2] || "").trim();
-        const baseRegion = String(row[3] || "").trim();
-        
+        const row = data[i]
+        if (!row || row.length === 0) continue
+
+        const name = String(row[1] || "").trim()
+        const department = String(row[2] || "").trim()
+        const baseRegion = String(row[3] || "").trim()
+
         if (name && name !== "NOMBRE DEL SOLICITANTE" && name !== "undefined") {
           if (!uniqueTravelers.has(name)) {
             uniqueTravelers.set(name, {
@@ -41,7 +50,7 @@ async function seed() {
               department: department !== "undefined" ? department : null,
               jobTitle: null,
               baseRegion: baseRegion !== "undefined" ? baseRegion : null,
-            });
+            })
           }
         }
       }
@@ -49,21 +58,22 @@ async function seed() {
 
     // Parse 'VIATICOS COMPROBADOS' for additional info
     if (workbook.SheetNames.includes("VIATICOS COMPROBADOS")) {
-      const sheet = workbook.Sheets["VIATICOS COMPROBADOS"];
-      const data = xlsx.utils.sheet_to_json<any[][]>(sheet, { header: 1 });
+      const sheet = workbook.Sheets["VIATICOS COMPROBADOS"]
+      const data = xlsx.utils.sheet_to_json<unknown[][]>(sheet, { header: 1 })
+
       for (let i = 2; i < data.length; i++) {
-        const row = data[i];
-        if (!row || row.length === 0) continue;
-        
-        const name = String(row[1] || "").trim();
-        const jobTitle = String(row[2] || "").trim();
-        const baseRegion = String(row[3] || "").trim();
-        
+        const row = data[i]
+        if (!row || row.length === 0) continue
+
+        const name = String(row[1] || "").trim()
+        const jobTitle = String(row[2] || "").trim()
+        const baseRegion = String(row[3] || "").trim()
+
         if (name && name !== "NOMBRE DEL SOLICITANTE" && name !== "undefined") {
           if (uniqueTravelers.has(name)) {
-            const traveler = uniqueTravelers.get(name)!;
+            const traveler = uniqueTravelers.get(name)!
             if (!traveler.jobTitle && jobTitle !== "undefined") {
-              traveler.jobTitle = jobTitle;
+              traveler.jobTitle = jobTitle
             }
           } else {
             uniqueTravelers.set(name, {
@@ -71,26 +81,68 @@ async function seed() {
               department: null,
               jobTitle: jobTitle !== "undefined" ? jobTitle : null,
               baseRegion: baseRegion !== "undefined" ? baseRegion : null,
-            });
+            })
           }
         }
       }
     }
 
-    const travelersToInsert = Array.from(uniqueTravelers.values());
-    console.log(`Found ${travelersToInsert.length} unique travelers to seed.`);
+    const travelersToInsert = Array.from(uniqueTravelers.values())
+    console.log(`Found ${travelersToInsert.length} unique travelers to seed.`)
 
     if (travelersToInsert.length > 0) {
-      await db.insert(schema.travelers).values(travelersToInsert).onConflictDoNothing();
-      console.log("Travelers seeded successfully!");
+      await db
+        .insert(schema.travelers)
+        .values(travelersToInsert)
+        .onConflictDoNothing()
+      console.log("Travelers seeded successfully!")
     } else {
-      console.log("No travelers found to seed.");
+      console.log("No travelers found to seed.")
     }
   } catch (err) {
-    console.error("Error during seeding:", err);
-  } finally {
-    process.exit(0);
+    console.error("Error seeding travelers:", err)
   }
 }
 
-seed();
+// ---------------------------------------------------------------------------
+// Seed master user
+// ---------------------------------------------------------------------------
+async function seedMasterUser() {
+  console.log("\nSeeding master user...")
+
+  const DEFAULT_EMAIL = "admin@travio.com"
+  const DEFAULT_PASSWORD = "Admin123!"
+
+  try {
+    const passwordHash = await bcrypt.hash(DEFAULT_PASSWORD, 12)
+
+    await db
+      .insert(schema.users)
+      .values({
+        email: DEFAULT_EMAIL,
+        passwordHash,
+        role: "master",
+      })
+      .onConflictDoNothing()
+
+    console.log("✓ Master user ready.")
+    console.log(`  Email:    ${DEFAULT_EMAIL}`)
+    console.log(`  Password: ${DEFAULT_PASSWORD}`)
+    console.log(
+      "  ⚠️  Change this password immediately after your first login!"
+    )
+  } catch (err) {
+    console.error("Error seeding master user:", err)
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Main
+// ---------------------------------------------------------------------------
+async function seed() {
+  await seedTravelers()
+  await seedMasterUser()
+  process.exit(0)
+}
+
+seed()

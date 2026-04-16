@@ -71,7 +71,7 @@
   --chart-3: oklch(0.45 0.017 213.2);
   --chart-4: oklch(0.378 0.015 216);
   --chart-5: oklch(0.275 0.011 216.9);
-  --radius: 0.625rem;
+  --radius: 0rem;
   --sidebar: oklch(0.987 0.002 197.1);
   --sidebar-foreground: oklch(0.148 0.004 228.8);
   --sidebar-primary: oklch(0.218 0.008 223.9);
@@ -125,5 +125,75 @@
   }
   html {
     @apply font-sans;
+  }
+}
+
+/* ─── Design System: Glassmorphism ─────────────────────────────────────────── */
+@layer utilities {
+  /**
+   * Glass card — semi-transparent surface with backdrop blur.
+   * Use on Card components and modal-like containers.
+   */
+  .glass {
+    background-color: oklch(from var(--card) l c h / 60%);
+    backdrop-filter: blur(12px) saturate(1.4);
+    -webkit-backdrop-filter: blur(12px) saturate(1.4);
+    border: 1px solid oklch(from var(--border) l c h / 60%);
+  }
+
+  /**
+   * Glass navigation bar — heavier blur for sticky top-bars and sidebars.
+   */
+  .glass-nav {
+    background-color: oklch(from var(--background) l c h / 75%);
+    backdrop-filter: blur(20px) saturate(1.6);
+    -webkit-backdrop-filter: blur(20px) saturate(1.6);
+    border-bottom: 1px solid oklch(from var(--border) l c h / 50%);
+  }
+}
+
+/* ─── Design System: Micro-animations ──────────────────────────────────────── */
+@layer utilities {
+  /**
+   * Subtle lift on hover — combine with `transition-all duration-200`.
+   */
+  .hover-lift {
+    transition-property: transform, box-shadow;
+    transition-duration: 180ms;
+    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .hover-lift:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px oklch(from var(--foreground) l c h / 8%);
+  }
+
+  /**
+   * Gentle scale pulse — useful for icon buttons and badge highlights.
+   */
+  .hover-scale {
+    transition-property: transform;
+    transition-duration: 150ms;
+    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .hover-scale:hover {
+    transform: scale(1.04);
+  }
+
+  /**
+   * Smooth fade-in for page-level or section content.
+   */
+  .animate-fade-in {
+    animation: fade-in 0.3s ease-out both;
+  }
+
+  @keyframes fade-in {
+    from {
+      opacity: 0;
+      transform: translateY(6px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
   }
 }
