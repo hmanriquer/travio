@@ -1,10 +1,6 @@
 "use client"
 
-import { Suspense, useState } from "react"
-import { useRouter, useSearchParams } from "next/navigation"
 import { AirplaneTiltIcon } from "@phosphor-icons/react"
-import { useMutation } from "@tanstack/react-query"
-import { signIn } from "next-auth/react"
 
 import {
   Card,
@@ -14,87 +10,24 @@ import {
   CardTitle,
 } from "@/components/ui/card"
 
-import { checkEmailExists } from "./actions"
 import { EmailForm } from "./components/email-form"
 import { PasswordForm } from "./components/password-form"
-
-type Step = "email" | "password"
+import { useLogin } from "./hooks/use-login"
 
 function LoginForm() {
-  const router = useRouter()
-  const searchParams = useSearchParams()
-  const callbackUrl = searchParams.get("callbackUrl") ?? "/"
-
-  const [step, setStep] = useState<Step>("email")
-  const [confirmedEmail, setConfirmedEmail] = useState("")
-
-  // ── Mutations ─────────────────────────────────────────────────────────────
-
-  const checkEmailMutation = useMutation({
-    mutationFn: (email: string) => checkEmailExists(email),
-  })
-
-  const signInMutation = useMutation({
-    mutationFn: async ({
-      email,
-      password,
-    }: {
-      email: string
-      password: string
-    }) => {
-      const result = await signIn("credentials", {
-        email,
-        password,
-        redirect: false,
-      })
-      if (result?.error) throw new Error(result.error)
-      return result
-    },
-    onSuccess: () => {
-      router.push(callbackUrl)
-      router.refresh()
-    },
-  })
-
-  // ── Handlers ──────────────────────────────────────────────────────────────
-
-  async function handleEmailSubmit(email: string) {
-    const exists = await checkEmailMutation.mutateAsync(email)
-    if (exists) {
-      setConfirmedEmail(email)
-      setStep("password")
-    }
-  }
-
-  async function handlePasswordSubmit(password: string) {
-    await signInMutation.mutateAsync({
-      email: confirmedEmail,
-      password,
-    })
-  }
-
-  function handleBack() {
-    setStep("email")
-    setConfirmedEmail("")
-    checkEmailMutation.reset()
-    signInMutation.reset()
-  }
-
-  function resolveEmailError(): string | null {
-    if (checkEmailMutation.isSuccess && !checkEmailMutation.data) {
-      return "No account found with this email address."
-    }
-    if (checkEmailMutation.isError) {
-      return "Something went wrong. Please try again."
-    }
-    return null
-  }
-
-  const emailError = resolveEmailError()
-
-  const passwordError = signInMutation.isError
-    ? "Contraseña incorrecta. Intenta de nuevo."
-    : null
+  const {
+    step,
+    confirmedEmail,
+    handleEmailSubmit,
+    handlePasswordSubmit,
+    handleBack,
+    clearEmailError,
+    clearPasswordError,
+    emailError,
+    passwordError,
+    isPendingEmail,
+    isPendingPassword,
+  } = useLogin()
 
   return (
     <section data-testid="login-container" className="w-full max-w-sm">
@@ -146,18 +79,18 @@ function LoginForm() {
             {step === "email" ? (
               <EmailForm
                 onSubmit={handleEmailSubmit}
-                isPending={checkEmailMutation.isPending}
+                isPending={isPendingEmail}
                 error={emailError}
-                onErrorClear={() => checkEmailMutation.reset()}
+                onErrorClear={clearEmailError}
               />
             ) : (
               <PasswordForm
                 confirmedEmail={confirmedEmail}
                 onSubmit={handlePasswordSubmit}
-                isPending={signInMutation.isPending}
+                isPending={isPendingPassword}
                 error={passwordError}
                 onBack={handleBack}
-                onErrorClear={() => signInMutation.reset()}
+                onErrorClear={clearPasswordError}
               />
             )}
           </div>
@@ -168,9 +101,5 @@ function LoginForm() {
 }
 
 export default function LoginPage() {
-  return (
-    <Suspense>
-      <LoginForm />
-    </Suspense>
-  )
+  return <LoginForm />
 }

@@ -33,4 +33,12 @@ export class UserRepository {
 
     return user ?? null
   }
+
+  /**
+   * Persists a new user record to the database.
+   */
+  async create(data: typeof users.$inferInsert): Promise<User> {
+    const [inserted] = await db.insert(users).values(data).returning()
+    return inserted
+  }
 }
