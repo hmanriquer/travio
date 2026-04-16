@@ -1,5 +1,5 @@
-import { TravelerRepository } from "@/lib/repositories/traveler.repository"
 import { travelers } from "@/drizzle/schema"
+import { TravelerRepository } from "@/lib/repositories/traveler.repository"
 
 type Traveler = typeof travelers.$inferSelect
 type NewTraveler = typeof travelers.$inferInsert
@@ -11,7 +11,9 @@ type NewTraveler = typeof travelers.$inferInsert
 export class TravelerService {
   private readonly travelerRepository: TravelerRepository
 
-  constructor(travelerRepository: TravelerRepository = new TravelerRepository()) {
+  constructor(
+    travelerRepository: TravelerRepository = new TravelerRepository()
+  ) {
     this.travelerRepository = travelerRepository
   }
 
@@ -38,7 +40,7 @@ export class TravelerService {
    * Creates a new traveler after normalizing the name.
    */
   async create(
-    data: Omit<NewTraveler, "id" | "createdAt" | "updatedAt">,
+    data: Omit<NewTraveler, "id" | "createdAt" | "updatedAt">
   ): Promise<Traveler> {
     return this.travelerRepository.create({
       ...data,
@@ -52,7 +54,7 @@ export class TravelerService {
    */
   async update(
     id: string,
-    data: Partial<Omit<NewTraveler, "id" | "createdAt">>,
+    data: Partial<Omit<NewTraveler, "id" | "createdAt">>
   ): Promise<Traveler> {
     const updated = await this.travelerRepository.update(id, data)
     if (!updated) {

@@ -21,7 +21,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
 
         return authService.validateCredentials(
           credentials.email as string,
-          credentials.password as string,
+          credentials.password as string
         )
       },
     }),

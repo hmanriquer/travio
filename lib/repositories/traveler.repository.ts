@@ -1,7 +1,7 @@
 import { eq } from "drizzle-orm"
 
-import { db } from "@/lib/db"
 import { travelers } from "@/drizzle/schema"
+import { db } from "@/lib/db"
 
 type Traveler = typeof travelers.$inferSelect
 type NewTraveler = typeof travelers.$inferInsert
@@ -48,7 +48,7 @@ export class TravelerRepository {
    */
   async update(
     id: string,
-    data: Partial<Omit<NewTraveler, "id" | "createdAt">>,
+    data: Partial<Omit<NewTraveler, "id" | "createdAt">>
   ): Promise<Traveler | null> {
     const [updated] = await db
       .update(travelers)

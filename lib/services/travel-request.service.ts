@@ -1,6 +1,6 @@
+import { travelRequests } from "@/drizzle/schema"
 import { TravelRequestRepository } from "@/lib/repositories/travel-request.repository"
 import { TravelerRepository } from "@/lib/repositories/traveler.repository"
-import { travelRequests } from "@/drizzle/schema"
 
 type TravelRequest = typeof travelRequests.$inferSelect
 type NewTravelRequest = typeof travelRequests.$inferInsert
@@ -16,7 +16,7 @@ export class TravelRequestService {
 
   constructor(
     travelRequestRepository: TravelRequestRepository = new TravelRequestRepository(),
-    travelerRepository: TravelerRepository = new TravelerRepository(),
+    travelerRepository: TravelerRepository = new TravelerRepository()
   ) {
     this.travelRequestRepository = travelRequestRepository
     this.travelerRepository = travelerRepository
@@ -58,7 +58,7 @@ export class TravelRequestService {
    * and the date range is coherent.
    */
   async create(
-    data: Omit<NewTravelRequest, "id" | "createdAt" | "updatedAt">,
+    data: Omit<NewTravelRequest, "id" | "createdAt" | "updatedAt">
   ): Promise<TravelRequest> {
     const traveler = await this.travelerRepository.findById(data.travelerId)
     if (!traveler) {
@@ -78,7 +78,7 @@ export class TravelRequestService {
    */
   async update(
     id: string,
-    data: Partial<Omit<NewTravelRequest, "id" | "createdAt">>,
+    data: Partial<Omit<NewTravelRequest, "id" | "createdAt">>
   ): Promise<TravelRequest> {
     if (data.startDate && data.endDate && data.startDate > data.endDate) {
       throw new Error("Start date must be before or equal to end date.")

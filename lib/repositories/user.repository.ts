@@ -1,7 +1,7 @@
 import { eq } from "drizzle-orm"
 
-import { db } from "@/lib/db"
 import { users } from "@/drizzle/schema"
+import { db } from "@/lib/db"
 
 type User = typeof users.$inferSelect
 

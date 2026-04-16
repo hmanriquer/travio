@@ -1,7 +1,7 @@
 import { eq } from "drizzle-orm"
 
-import { db } from "@/lib/db"
 import { travelRequests } from "@/drizzle/schema"
+import { db } from "@/lib/db"
 
 type TravelRequest = typeof travelRequests.$inferSelect
 type NewTravelRequest = typeof travelRequests.$inferInsert
@@ -50,10 +50,7 @@ export class TravelRequestRepository {
    * Inserts a new travel request and returns the created record.
    */
   async create(data: NewTravelRequest): Promise<TravelRequest> {
-    const [created] = await db
-      .insert(travelRequests)
-      .values(data)
-      .returning()
+    const [created] = await db.insert(travelRequests).values(data).returning()
 
     return created
   }
@@ -64,7 +61,7 @@ export class TravelRequestRepository {
    */
   async update(
     id: string,
-    data: Partial<Omit<NewTravelRequest, "id" | "createdAt">>,
+    data: Partial<Omit<NewTravelRequest, "id" | "createdAt">>
   ): Promise<TravelRequest | null> {
     const [updated] = await db
       .update(travelRequests)

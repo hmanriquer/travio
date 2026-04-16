@@ -1,5 +1,5 @@
-import { UserRepository } from "@/lib/repositories/user.repository"
 import { verifyPassword } from "@/lib/password"
+import { UserRepository } from "@/lib/repositories/user.repository"
 
 type AuthUser = {
   id: string
@@ -34,7 +34,7 @@ export class AuthService {
    */
   async validateCredentials(
     email: string,
-    password: string,
+    password: string
   ): Promise<AuthUser | null> {
     const user = await this.userRepository.findByEmail(email)
     if (!user) return null

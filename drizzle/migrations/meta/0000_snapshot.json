@@ -136,12 +136,8 @@
           "name": "travel_requests_traveler_id_travelers_id_fk",
           "tableFrom": "travel_requests",
           "tableTo": "travelers",
-          "columnsFrom": [
-            "traveler_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["traveler_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -263,9 +259,7 @@
         "users_email_unique": {
           "name": "users_email_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "email"
-          ]
+          "columns": ["email"]
         }
       },
       "policies": {},
@@ -277,21 +271,12 @@
     "public.role": {
       "name": "role",
       "schema": "public",
-      "values": [
-        "master",
-        "admin"
-      ]
+      "values": ["master", "admin"]
     },
     "public.status": {
       "name": "status",
       "schema": "public",
-      "values": [
-        "PENDING",
-        "APPROVED",
-        "PROVEN",
-        "COMPLETED",
-        "REJECTED"
-      ]
+      "values": ["PENDING", "APPROVED", "PROVEN", "COMPLETED", "REJECTED"]
     }
   },
   "schemas": {},

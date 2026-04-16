@@ -30,7 +30,7 @@ export default function NotFoundPage() {
 
         {/* 404 callout */}
         <div className="flex flex-col gap-1.5">
-          <p className="font-fancy text-6xl font-black italic tracking-wide text-foreground/20 drop-shadow-sm select-none">
+          <p className="font-fancy text-6xl font-black tracking-wide text-foreground/20 italic drop-shadow-sm select-none">
             404
           </p>
           <h1 className="text-lg font-semibold text-foreground">
@@ -45,7 +45,7 @@ export default function NotFoundPage() {
         {/* Action */}
         <Link
           href="/"
-          className="glass hover-lift w-full px-4 py-2 text-sm font-semibold text-foreground shadow-sm transition-colors hover:bg-primary/10 text-center"
+          className="glass hover-lift w-full px-4 py-2 text-center text-sm font-semibold text-foreground shadow-sm transition-colors hover:bg-primary/10"
         >
           Regresar al inicio
         </Link>

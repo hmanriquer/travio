@@ -7,7 +7,9 @@ import { SessionProvider } from "next-auth/react"
 import { ThemeProvider } from "@/components/theme-provider"
 import { Toaster } from "@/components/ui/sonner"
 
-export default function Providers({ children }: { children: React.ReactNode }) {
+export default function Providers({
+  children,
+}: Readonly<{ children: React.ReactNode }>) {
   const [queryClient] = useState(
     () =>
       new QueryClient({
@@ -24,7 +26,7 @@ export default function Providers({ children }: { children: React.ReactNode }) {
       <SessionProvider>
         <ThemeProvider>
           <Toaster richColors position="top-center" />
-          {children}
+          <main className="mx-auto max-w-7xl px-4 sm:px-6">{children}</main>
         </ThemeProvider>
       </SessionProvider>
     </QueryClientProvider>

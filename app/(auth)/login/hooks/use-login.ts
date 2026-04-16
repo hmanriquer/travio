@@ -2,7 +2,13 @@ import { useState } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { useMutation } from "@tanstack/react-query"
 import { signIn } from "next-auth/react"
+import { toast } from "sonner"
+
+import { logger } from "@/lib/logger"
+
 import { checkEmailExists } from "../actions"
+
+const log = logger.child("auth:login")
 
 export type Step = "email" | "password"
 
@@ -17,7 +23,10 @@ export function useLogin() {
   // ── Mutations ─────────────────────────────────────────────────────────────
 
   const checkEmailMutation = useMutation({
-    mutationFn: (email: string) => checkEmailExists(email),
+    mutationFn: (email: string) => {
+      log.debug("Checking email existence", { email })
+      return checkEmailExists(email)
+    },
   })
 
   const signInMutation = useMutation({
@@ -37,8 +46,13 @@ export function useLogin() {
       return result
     },
     onSuccess: () => {
+      log.info("Sign-in successful", { callbackUrl })
       router.push(callbackUrl)
       router.refresh()
+    },
+    onError: (error) => {
+      log.error("Sign-in failed", error)
+      toast.error(error.message)
     },
   })
 
@@ -47,8 +61,11 @@ export function useLogin() {
   async function handleEmailSubmit(email: string) {
     const exists = await checkEmailMutation.mutateAsync(email)
     if (exists) {
+      log.info("Email verified, advancing to password step", { email })
       setConfirmedEmail(email)
       setStep("password")
+    } else {
+      log.warn("Email not found", { email })
     }
   }
 
@@ -60,6 +77,7 @@ export function useLogin() {
   }
 
   function handleBack() {
+    log.debug("User returned to email step")
     setStep("email")
     setConfirmedEmail("")
     checkEmailMutation.reset()
