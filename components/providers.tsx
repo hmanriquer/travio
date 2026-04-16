@@ -23,7 +23,7 @@ export default function Providers({ children }: { children: React.ReactNode }) {
     <QueryClientProvider client={queryClient}>
       <SessionProvider>
         <ThemeProvider>
-          <Toaster />
+          <Toaster richColors position="top-center" />
           {children}
         </ThemeProvider>
       </SessionProvider>

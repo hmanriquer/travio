@@ -2,12 +2,10 @@
 
 import { Suspense, useState } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
-import { EnvelopeSimple, Lock, WarningCircle } from "@phosphor-icons/react"
-import { useForm } from "@tanstack/react-form"
+import { AirplaneTiltIcon } from "@phosphor-icons/react"
 import { useMutation } from "@tanstack/react-query"
 import { signIn } from "next-auth/react"
 
-import { Button } from "@/components/ui/button"
 import {
   Card,
   CardContent,
@@ -15,30 +13,12 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
 
 import { checkEmailExists } from "./actions"
+import { EmailForm } from "./components/email-form"
+import { PasswordForm } from "./components/password-form"
 
 type Step = "email" | "password"
-
-function FieldError({ message }: { message: string }) {
-  return (
-    <p className="flex items-center gap-1 text-xs text-destructive">
-      <WarningCircle className="size-3 shrink-0" />
-      {message}
-    </p>
-  )
-}
-
-function StepError({ message }: { message: string }) {
-  return (
-    <div className="flex items-start gap-2 border border-destructive/30 bg-destructive/5 px-3 py-2 text-xs text-destructive">
-      <WarningCircle className="mt-px size-3.5 shrink-0" />
-      <span>{message}</span>
-    </div>
-  )
-}
 
 function LoginForm() {
   const router = useRouter()
@@ -76,38 +56,28 @@ function LoginForm() {
     },
   })
 
-  // ── Email form ────────────────────────────────────────────────────────────
+  // ── Handlers ──────────────────────────────────────────────────────────────
 
-  const emailForm = useForm({
-    defaultValues: { email: "" },
-    onSubmit: async ({ value }) => {
-      const exists = await checkEmailMutation.mutateAsync(value.email)
-      if (exists) {
-        setConfirmedEmail(value.email)
-        setStep("password")
-      }
-    },
-  })
+  async function handleEmailSubmit(email: string) {
+    const exists = await checkEmailMutation.mutateAsync(email)
+    if (exists) {
+      setConfirmedEmail(email)
+      setStep("password")
+    }
+  }
 
-  // ── Password form ─────────────────────────────────────────────────────────
+  async function handlePasswordSubmit(password: string) {
+    await signInMutation.mutateAsync({
+      email: confirmedEmail,
+      password,
+    })
+  }
 
-  const passwordForm = useForm({
-    defaultValues: { password: "" },
-    onSubmit: async ({ value }) => {
-      await signInMutation.mutateAsync({
-        email: confirmedEmail,
-        password: value.password,
-      })
-    },
-  })
-
-  // ── Helpers ───────────────────────────────────────────────────────────────
-
-  function goBack() {
+  function handleBack() {
     setStep("email")
+    setConfirmedEmail("")
     checkEmailMutation.reset()
     signInMutation.reset()
-    passwordForm.reset()
   }
 
   function resolveEmailError(): string | null {
@@ -123,27 +93,47 @@ function LoginForm() {
   const emailError = resolveEmailError()
 
   const passwordError = signInMutation.isError
-    ? "Incorrect password. Please try again."
+    ? "Contraseña incorrecta. Intenta de nuevo."
     : null
 
-  // ── Render ────────────────────────────────────────────────────────────────
-
   return (
-    <div className="w-full max-w-sm">
-      <div className="mb-6 text-center">
-        <h1 className="text-base font-semibold tracking-tight">Travio</h1>
-        <p className="mt-0.5 text-xs text-muted-foreground">
+    <section data-testid="login-container" className="w-full max-w-sm">
+      <div data-testid="login-header" className="mb-8 text-center">
+        <div className="relative mx-auto mb-6 flex size-16 items-center justify-center">
+          <div className="absolute inset-0 rounded-full bg-primary/20 blur-xl" />
+          <section
+            data-testid="logo-icon-login"
+            className="glass hover-scale relative flex size-full items-center justify-center rounded-[8px] shadow-xl"
+          >
+            <AirplaneTiltIcon
+              weight="duotone"
+              className="size-8 text-primary drop-shadow-md"
+            />
+          </section>
+        </div>
+        <h1
+          data-testid="logo-text-login"
+          className="font-fancy text-4xl font-black tracking-wide text-foreground italic drop-shadow-sm"
+        >
+          Travio
+        </h1>
+        <p
+          data-testid="logo-description-login"
+          className="mt-0.5 text-xs text-muted-foreground"
+        >
           Travel expense management
         </p>
       </div>
 
-      <Card>
+      <Card className="glass">
         <CardHeader>
-          <CardTitle>{step === "email" ? "Sign in" : "Welcome back"}</CardTitle>
+          <CardTitle>
+            {step === "email" ? "Inicia Sesión" : "Bienvenido"}
+          </CardTitle>
           <CardDescription>
             {step === "email"
-              ? "Enter your email to continue."
-              : "Enter your password to sign in."}
+              ? "Ingresa tu correo electrónico para continuar."
+              : "Ingresa tu contraseña para iniciar sesión."}
           </CardDescription>
         </CardHeader>
 
@@ -153,184 +143,27 @@ function LoginForm() {
             key={step}
             className="animate-in duration-200 fade-in slide-in-from-bottom-1"
           >
-            {/* ── Step 1: Email ──────────────────────────────────────────── */}
             {step === "email" ? (
-              <form
-                onSubmit={(e) => {
-                  e.preventDefault()
-                  e.stopPropagation()
-                  void emailForm.handleSubmit()
-                }}
-                className="flex flex-col gap-4"
-              >
-                <emailForm.Field
-                  name="email"
-                  validators={{
-                    onBlur: ({ value }) => {
-                      if (!value.trim()) return "Email is required."
-                      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim()))
-                        return "Please enter a valid email address."
-                      return undefined
-                    },
-                  }}
-                >
-                  {(field) => (
-                    <div className="flex flex-col gap-1.5">
-                      <Label htmlFor="email">Email</Label>
-                      <div className="relative">
-                        <EnvelopeSimple
-                          className="pointer-events-none absolute top-1/2 left-2.5 size-3.5 -translate-y-1/2 text-muted-foreground"
-                          aria-hidden
-                        />
-                        <Input
-                          id="email"
-                          type="email"
-                          placeholder="you@example.com"
-                          value={field.state.value}
-                          onChange={(e) => {
-                            field.handleChange(e.target.value)
-                            // clear server error banner as soon as user edits
-                            if (
-                              checkEmailMutation.isSuccess ||
-                              checkEmailMutation.isError
-                            ) {
-                              checkEmailMutation.reset()
-                            }
-                          }}
-                          onBlur={field.handleBlur}
-                          className="pl-7"
-                          autoComplete="email"
-                          autoFocus
-                          aria-invalid={
-                            field.state.meta.isTouched &&
-                            field.state.meta.errors.length > 0
-                          }
-                          disabled={checkEmailMutation.isPending}
-                        />
-                      </div>
-                      {field.state.meta.isTouched &&
-                        field.state.meta.errors.length > 0 && (
-                          <FieldError
-                            message={String(field.state.meta.errors[0])}
-                          />
-                        )}
-                    </div>
-                  )}
-                </emailForm.Field>
-
-                {emailError && <StepError message={emailError} />}
-
-                <emailForm.Subscribe selector={(state) => state.isSubmitting}>
-                  {(isSubmitting) => (
-                    <Button
-                      type="submit"
-                      className="mt-1 w-full"
-                      disabled={isSubmitting}
-                    >
-                      {isSubmitting ? "Checking…" : "Continue"}
-                    </Button>
-                  )}
-                </emailForm.Subscribe>
-              </form>
+              <EmailForm
+                onSubmit={handleEmailSubmit}
+                isPending={checkEmailMutation.isPending}
+                error={emailError}
+                onErrorClear={() => checkEmailMutation.reset()}
+              />
             ) : (
-              /* ── Step 2: Password ─────────────────────────────────────── */
-              <form
-                onSubmit={(e) => {
-                  e.preventDefault()
-                  e.stopPropagation()
-                  void passwordForm.handleSubmit()
-                }}
-                className="flex flex-col gap-4"
-              >
-                {/* Confirmed email badge */}
-                <div className="flex items-center justify-between border border-input bg-muted/40 px-2.5 py-1.5">
-                  <div className="flex min-w-0 items-center gap-2">
-                    <EnvelopeSimple className="size-3.5 shrink-0 text-muted-foreground" />
-                    <span className="truncate text-xs text-muted-foreground">
-                      {confirmedEmail}
-                    </span>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={goBack}
-                    disabled={signInMutation.isPending}
-                    className="ml-3 shrink-0 text-xs text-primary underline-offset-2 hover:underline disabled:pointer-events-none disabled:opacity-50"
-                  >
-                    Change
-                  </button>
-                </div>
-
-                <passwordForm.Field
-                  name="password"
-                  validators={{
-                    onBlur: ({ value }) => {
-                      if (!value) return "Password is required."
-                      return undefined
-                    },
-                  }}
-                >
-                  {(field) => (
-                    <div className="flex flex-col gap-1.5">
-                      <Label htmlFor="password">Password</Label>
-                      <div className="relative">
-                        <Lock
-                          className="pointer-events-none absolute top-1/2 left-2.5 size-3.5 -translate-y-1/2 text-muted-foreground"
-                          aria-hidden
-                        />
-                        <Input
-                          id="password"
-                          type="password"
-                          placeholder="••••••••"
-                          value={field.state.value}
-                          onChange={(e) => {
-                            field.handleChange(e.target.value)
-                            // clear server error banner as soon as user edits
-                            if (signInMutation.isError) {
-                              signInMutation.reset()
-                            }
-                          }}
-                          onBlur={field.handleBlur}
-                          className="pl-7"
-                          autoComplete="current-password"
-                          autoFocus
-                          aria-invalid={
-                            field.state.meta.isTouched &&
-                            field.state.meta.errors.length > 0
-                          }
-                          disabled={signInMutation.isPending}
-                        />
-                      </div>
-                      {field.state.meta.isTouched &&
-                        field.state.meta.errors.length > 0 && (
-                          <FieldError
-                            message={String(field.state.meta.errors[0])}
-                          />
-                        )}
-                    </div>
-                  )}
-                </passwordForm.Field>
-
-                {passwordError && <StepError message={passwordError} />}
-
-                <passwordForm.Subscribe
-                  selector={(state) => state.isSubmitting}
-                >
-                  {(isSubmitting) => (
-                    <Button
-                      type="submit"
-                      className="mt-1 w-full"
-                      disabled={isSubmitting}
-                    >
-                      {isSubmitting ? "Signing in…" : "Sign in"}
-                    </Button>
-                  )}
-                </passwordForm.Subscribe>
-              </form>
+              <PasswordForm
+                confirmedEmail={confirmedEmail}
+                onSubmit={handlePasswordSubmit}
+                isPending={signInMutation.isPending}
+                error={passwordError}
+                onBack={handleBack}
+                onErrorClear={() => signInMutation.reset()}
+              />
             )}
           </div>
         </CardContent>
       </Card>
-    </div>
+    </section>
   )
 }
 
