@@ -1,3 +1,4 @@
+import { relations } from "drizzle-orm"
 import {
   boolean,
   date,
@@ -72,3 +73,16 @@ export const travelRequests = pgTable("travel_requests", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 })
+
+// ── Relations ──────────────────────────────────────────────────────────────────
+
+export const travelersRelations = relations(travelers, ({ many }) => ({
+  travelRequests: many(travelRequests),
+}))
+
+export const travelRequestsRelations = relations(travelRequests, ({ one }) => ({
+  traveler: one(travelers, {
+    fields: [travelRequests.travelerId],
+    references: [travelers.id],
+  }),
+}))

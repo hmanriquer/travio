@@ -1,19 +1,10 @@
 import { AirplaneTiltIcon, SignOutIcon } from "@phosphor-icons/react/dist/ssr"
 
 import { auth, signOut } from "@/auth"
+import { NavLinks } from "@/components/nav-links"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
-
-// ── Helpers ────────────────────────────────────────────────────────────────────
-
-function getInitials(name?: string | null): string {
-  if (!name) return "?"
-  return name
-    .split(" ")
-    .slice(0, 2)
-    .map((part) => part[0]?.toUpperCase() ?? "")
-    .join("")
-}
+import { getInitials } from "@/lib/utils"
 
 // ── Sub-components ─────────────────────────────────────────────────────────────
 
@@ -21,13 +12,15 @@ function NavBrand() {
   return (
     <div className="flex items-center gap-2">
       {/* Icon */}
-      <AirplaneTiltIcon
-        weight="duotone"
-        className="size-5 text-primary drop-shadow-sm"
-      />
+      <div className="flex size-8 items-center justify-center rounded-lg bg-primary/10">
+        <AirplaneTiltIcon
+          weight="duotone"
+          className="size-5 text-primary drop-shadow-sm"
+        />
+      </div>
 
       {/* Wordmark */}
-      <span className="font-fancy text-xl leading-none font-black tracking-wide text-foreground italic select-none">
+      <span className="font-fancy text-2xl leading-none font-black tracking-tight text-foreground italic select-none">
         Travio
       </span>
     </div>
@@ -44,14 +37,14 @@ function UserArea({ name, email }: Readonly<UserAreaProps>) {
     <div className="flex items-center gap-3">
       {/* User info */}
       <div className="hidden flex-col items-end sm:flex">
-        <span className="max-w-[160px] truncate text-xs leading-tight text-muted-foreground">
+        <span className="max-w-[160px] truncate text-[10px] font-bold uppercase tracking-wider text-muted-foreground/60">
           {email ?? ""}
         </span>
       </div>
 
       {/* Avatar */}
-      <Avatar className="size-7 ring-1 ring-border">
-        <AvatarFallback className="bg-primary/10 text-xs font-semibold text-primary">
+      <Avatar className="size-8 ring-1 ring-primary/20">
+        <AvatarFallback className="bg-primary/10 text-xs font-black text-primary">
           {getInitials(name)}
         </AvatarFallback>
       </Avatar>
@@ -66,8 +59,8 @@ function UserArea({ name, email }: Readonly<UserAreaProps>) {
         <Button
           type="submit"
           variant="ghost"
-          size="icon"
-          className="text-muted-foreground hover:text-foreground"
+          size="icon-sm"
+          className="text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
           title="Cerrar sesión"
         >
           <SignOutIcon className="size-4" />
@@ -88,12 +81,15 @@ export async function Navbar() {
   const session = await auth()
 
   return (
-    <header className="glass-nav animate-fade-in sticky top-0 z-50 w-full">
+    <header className="glass-nav animate-fade-in sticky top-0 z-50 w-full rounded-b-2xl shadow-sm ring-1 ring-foreground/5">
       <nav
         aria-label="Main navigation"
-        className="mx-auto flex h-14 max-w-7xl items-center justify-between px-4 sm:px-6"
+        className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8"
       >
-        <NavBrand />
+        <div className="flex items-center gap-10">
+          <NavBrand />
+          <NavLinks />
+        </div>
         {session?.user && (
           <UserArea name={session.user.name} email={session.user.email} />
         )}

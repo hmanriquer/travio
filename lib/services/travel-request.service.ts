@@ -1,6 +1,12 @@
 import { travelRequests } from "@/drizzle/schema"
 import { TravelRequestRepository } from "@/lib/repositories/travel-request.repository"
 import { TravelerRepository } from "@/lib/repositories/traveler.repository"
+import type {
+  DashboardSummary,
+  PendingTaskItem,
+  RecentActivityItem,
+} from "@/lib/types/dashboard.types"
+import type { TravelRow } from "@/lib/types/travels.types"
 
 type TravelRequest = typeof travelRequests.$inferSelect
 type NewTravelRequest = typeof travelRequests.$inferInsert
@@ -27,6 +33,18 @@ export class TravelRequestService {
    */
   async getAll(): Promise<TravelRequest[]> {
     return this.travelRequestRepository.findAll()
+  }
+
+  /**
+   * Returns a travel request by ID, including traveler information.
+   * Throws if the request does not exist.
+   */
+  async getByIdWithTraveler(id: string) {
+    const request = await this.travelRequestRepository.findByIdWithTraveler(id)
+    if (!request) {
+      throw new Error(`Travel request with id "${id}" not found.`)
+    }
+    return request
   }
 
   /**
@@ -100,5 +118,36 @@ export class TravelRequestService {
     if (!deleted) {
       throw new Error(`Travel request with id "${id}" not found.`)
     }
+  }
+
+  // ── Dashboard ────────────────────────────────────────────────────────────────
+
+  /**
+   * Returns aggregated financial totals and status counts for the dashboard.
+   */
+  async getDashboardSummary(): Promise<DashboardSummary> {
+    return this.travelRequestRepository.findDashboardSummary()
+  }
+
+  /**
+   * Returns the N most recent travel requests with traveler info.
+   * Defaults to the last 5 records.
+   */
+  async getRecentActivity(limit = 5): Promise<RecentActivityItem[]> {
+    return this.travelRequestRepository.findRecentWithTraveler(limit)
+  }
+
+  /**
+   * Returns all PENDING travel requests with traveler info and computed priority.
+   */
+  async getPendingTasks(): Promise<PendingTaskItem[]> {
+    return this.travelRequestRepository.findPendingWithTraveler()
+  }
+
+  /**
+   * Returns all travel requests with traveler info for the travels table.
+   */
+  async getAllWithTraveler(): Promise<TravelRow[]> {
+    return this.travelRequestRepository.findAllWithTraveler()
   }
 }

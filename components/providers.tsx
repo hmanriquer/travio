@@ -26,7 +26,7 @@ export default function Providers({
       <SessionProvider>
         <ThemeProvider>
           <Toaster richColors position="top-center" />
-          <main className="mx-auto max-w-7xl px-4 sm:px-6">{children}</main>
+          {children}
         </ThemeProvider>
       </SessionProvider>
     </QueryClientProvider>

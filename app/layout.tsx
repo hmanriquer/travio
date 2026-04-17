@@ -2,7 +2,7 @@ import { Geist_Mono, Mulish, Playfair_Display } from "next/font/google"
 
 import "./globals.css"
 
-import { Navbar } from "@/components/navbar"
+import { BackgroundBlobs } from "@/components/ui/background-blobs"
 import Providers from "@/components/providers"
 import { cn } from "@/lib/utils"
 
@@ -37,8 +37,10 @@ export default function RootLayout({
       )}
     >
       <body>
-        <Navbar />
-        <Providers>{children}</Providers>
+        <Providers>
+          <BackgroundBlobs />
+          {children}
+        </Providers>
       </body>
     </html>
   )
