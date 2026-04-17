@@ -113,19 +113,24 @@ function RowActions({ row }: { row: TravelRow }) {
             size="icon"
             className="size-7 data-[state=open]:bg-muted"
             aria-label="Abrir acciones"
-          />
+          >
+            <DotsThreeIcon className="size-4" weight="bold" />
+          </Button>
         }
-      >
-        <DotsThreeIcon className="size-4" weight="bold" />
-      </DropdownMenuTrigger>
+      />
 
       <DropdownMenuContent align="end">
-        <DropdownMenuItem asChild>
-          <Link href={`/travels/${row.id}`} className="flex w-full items-center gap-2">
-            <EyeIcon weight="duotone" className="size-4" />
-            Ver detalles
-          </Link>
-        </DropdownMenuItem>
+        <DropdownMenuItem
+          render={
+            <Link
+              href={`/travels/${row.id}`}
+              className="flex w-full items-center gap-2"
+            >
+              <EyeIcon weight="duotone" className="size-4" />
+              Ver detalles
+            </Link>
+          }
+        />
         <DropdownMenuItem>
           <PencilSimpleIcon weight="duotone" />
           Editar

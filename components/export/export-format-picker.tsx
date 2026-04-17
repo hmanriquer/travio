@@ -7,6 +7,7 @@ import {
   FilePdfIcon,
   FileXlsIcon,
 } from "@phosphor-icons/react/dist/ssr"
+import type { IconWeight } from "@phosphor-icons/react"
 
 import { Button } from "@/components/ui/button"
 import {
@@ -24,7 +25,10 @@ import { cn } from "@/lib/utils"
 
 // ── Format manifest ───────────────────────────────────────────────────────────
 
-type IconComponent = React.ComponentType<{ className?: string; weight?: string }>
+type IconComponent = React.ComponentType<{
+  className?: string
+  weight?: IconWeight
+}>
 
 type FormatConfig = {
   readonly id: ExportFormat

@@ -155,25 +155,27 @@ export function EditTravelDialog({ travel }: EditTravelDialogProps) {
                 name="travelerId"
                 render={({ field }) => (
                   <Popover open={popoverOpen} onOpenChange={setPopoverOpen}>
-                    <PopoverTrigger asChild>
-                      <Button
-                        variant="outline"
-                        role="combobox"
-                        aria-expanded={popoverOpen}
-                        className={cn(
-                          "h-8 w-full justify-between rounded-none border-input bg-transparent px-2.5 text-xs font-normal hover:bg-transparent focus-visible:ring-1 focus-visible:ring-ring/50 dark:bg-input/30",
-                          !field.value && "text-muted-foreground"
-                        )}
-                        disabled={loadingTravelers}
-                      >
-                        {field.value
-                          ? travelers.find((t) => t.id === field.value)?.name
-                          : loadingTravelers
-                            ? "Cargando viajeros..."
-                            : "Seleccionar viajero..."}
-                        <CaretDownIcon className="ml-2 size-4 shrink-0 opacity-50" />
-                      </Button>
-                    </PopoverTrigger>
+                    <PopoverTrigger
+                      render={
+                        <Button
+                          variant="outline"
+                          role="combobox"
+                          aria-expanded={popoverOpen}
+                          className={cn(
+                            "h-8 w-full justify-between rounded-none border-input bg-transparent px-2.5 text-xs font-normal hover:bg-transparent focus-visible:ring-1 focus-visible:ring-ring/50 dark:bg-input/30",
+                            !field.value && "text-muted-foreground"
+                          )}
+                          disabled={loadingTravelers}
+                        >
+                          {field.value
+                            ? travelers.find((t) => t.id === field.value)?.name
+                            : loadingTravelers
+                              ? "Cargando viajeros..."
+                              : "Seleccionar viajero..."}
+                          <CaretDownIcon className="ml-2 size-4 shrink-0 opacity-50" />
+                        </Button>
+                      }
+                    />
                     <PopoverContent className="w-[--anchor-width] p-0" align="start">
                       <Command>
                         <CommandInput placeholder="Buscar viajero..." />
